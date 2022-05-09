@@ -1,0 +1,55 @@
+1 - WPROWADZENIE
+    LVM - (Logical Volume Manager) - zarządca woluminów logicznych
+    Składa się z trzech części:
+        - fizyczny wolumin LVM - jest to fizyczny dysk twardy lub partycja,
+        - grupa LVM - na którą składa się zbiór dysków i/lub partycji
+        - logiczny wolumin LVM - jest to partycja LVM, która została wydzielona z grupy LVM
+
+    1. Na podstawie minium dwóch fizycznych woluminów w systmie linux, tworzymy wolumen fizyczny LVM. w kontekście LVM fizyczność oznacza również partycja. Poleceniem:
+    sudo pvcreate /dev/sdb1 /dev/sdc -> tworzymy fizyczne wolumeny LVM, z partycji 1 dysku /dev/sdb oraz całego fizycznego dysku /dev/sdc.
+    UWAGA! Przed przygotowaniem woluminu LVM należy mieć odmotowany dysk twardy lub polecenie, inaczej pojawi się błąd podczas wykonywania pvcreate.
+
+    2. Następnie, należy utworzyć grupę LVMową za pomocą polecenia sudo vgcreate GrupaLVM /dev/sdb1 /dev/sdc
+    
+    3. Wyświetlenie właściwości grupy LVM sudo vgdisplay
+    
+    4. Mając przygotowaną grupę LVMową należy przygtować wolumen logiczny (traktujemy to jak zwykłą partycję na dysku). Aby to wykonać należy użyć polecenia: 
+    sudo lvcreate --name SAMBA --size 12g GrupaLVM. Wynikiem polecenia będzie utworzony woluemn logiczny o nazwie SAMBA o rozmiarze 12 GB w grupie GrupaLVM.
+    
+    5. po utworzeniu partycji LVMowej należy utworzyć system plików. Aby to wykonać należy użyć polecenia sudo mkfs.ext4 /dev/mapper/GrupaLVM-SAMBA.
+    Dla tego woluminu zostanie utworzony system plików ext4.
+    
+    6. Tak przygotowaną partycję LVMową możemy zamapować w systemie. Do tego służy polecenie: sudo mount /dev/mapper/GrupaLVM-SAMBA /katalog/montowania.
+
+
+2 - POLECENIA
+sudo pvcreate /dev/sdXY /dev/sdXY -> tworzymy fizyczne wolumeny LVM, gdzie X, to kolejny dysk, a Y, kolejna partycja (o ile występuje)
+
+sudo vgcreate NazwaGrupyLVM /dev/sdXY /dev/sdXY -> tworzymy grupę wolumenów z wcześniej przygotowanych fizycznych folumenów, gdzie NazwaGrupyLVM, to nazwa grupy jaką będziemy używać, natomiast /dev/sdXY /dev/sdXY to fizyczne wolumeny przypisane do tej grupy 
+
+sudo vgdisplay -> wyświetla właściwości wszystkich grup LVMowych
+
+sudo vgextend NazwaGrupyLVM /dev/sdXY -> rozszerzamy naszą grupę LVMową o nowy dysk lup partycję, wcześniej taki dysk lub partycję należy skonwertować na fizyczny wolumen LVM
+
+sudo lvcreate --mame NazwaPartycjiLVM --size Xg NazwaGrupyLVM -> tworzymy logiczny wolumen LVM (partycję LVMową), gdzie jako parametr podajemy jej nazwę, rozmiar (tutaj w GB) oraz grupę, do której będzie ona należeć
+
+sudo lvs -> wyświetla podstawowe informacje o wolumenie logicznym LVM
+
+sudo mkfs.ZZZ /dev/mapper/NazwaGrupyLVM-NazwaPartycjiLVM -> dla wolumenu logicznego NazwaPartycjiLVM znajdującego się w grupie LVMowej NazwaGrupyLVM zostanie utworzony system plików o rozszerzeniu ZZZ
+
+sudo mount /dev/mapper/NazwaGrupyLVM-NazwaPartycjiLVM /katalog/montowania -> monotwanie partycji LVMowej, do wcześniej utworzonego katalogu
+
+df -h -> sprawdzenie podmontownych (wszystkich) partycji
+
+
+3 - POLECENIA ZAAWANOSWANE
+    Powiększanie partycji LVM:
+    sudo lvextend --size +Xg --resizefs /dev/mapper/NazwaGrupyLVM-NazwaPartycjiLVM -> do partycji logicznej dodaje X GB. Za pomocą przełącznika --resizefs sprawiamy, 
+    że nowododana przestrzeń ma taki sam system plików i jest możliwa do użycia
+    
+
+4 - UWAGI
+Podobnie jak zwykłe partycje, partycje LVMowe zapisują swoje pliki w kalogu mapper (/dev/mapper). Gdy zaglądniemy do katalogu mapper używając polecenia:
+ls -l /dev/mapper to zobaczymy wszystkie partycje LVM (o ile zostały utworzone). Nazwa partycji zaczyna się od nazwy grupy, następnie jest myślnik, a na końcu nazwa 
+logicznego woluminu, tak więc nazwa partycji SAMBA utworznej w grupie GrupaLVM będzie miała następujący wygląd -> GrupaVLM-SAMBA, a pełna ścieżka to /dev/mapper/GrupaLVM-SAMBA
+
