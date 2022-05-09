@@ -1,0 +1,13 @@
+Dyski, które są montowane automatycznie w systmie linux znajdują się w katalugo /etc/fstab
+Aby wyświetlić zawartość pliku /etc/fstab należy użyć polecenia cat /etc/fstab lub nano /etc/fstab
+Najbezpieczniej jest wykorzystać unikalny identyfikator dysku lub partycji (UUID)
+
+(Jeśli nie został utowrzony folder montowania, to należy to przygotować przed edycją pliku fstab!)
+
+Aby wyświetlić UUID konkretnego dysku lub partycji (również LVM) należy wykonać polecenie: sudo blkid /dev/sdXY
+(gdzie X to litera dysku, a Y litera partycji, jeśli wystęuje)
+
+Po uzyskaniu UUID interesującego nas wolumenu należy przejść do edycji /etc/fstab. Należy wprowadzić dane zachowując nastęującą kolejność:
+    - UUID dysku,
+    - katalog montowania,
+    - system plików
